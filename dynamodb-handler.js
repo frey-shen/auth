@@ -35,12 +35,14 @@ function validateUserInput(userData) {
 }
 
 /**
- * 检查用户是否已存在（通过邮箱）
+ * 检查用户是否已存在（通过邮箱或用户名）
+ * @param {string} username - 用户名
  * @param {string} email - 邮箱
  * @returns {Promise<boolean>} - 用户是否已存在
  */
-async function checkUserExists(email) {
-  const params = {
+async function checkUserExists(username, email) {
+  // 检查邮箱是否已存在
+  const emailParams = {
     TableName: TABLE_NAME,
     IndexName: 'EmailIndex',
     KeyConditionExpression: 'email = :email',
@@ -49,8 +51,22 @@ async function checkUserExists(email) {
     }
   };
   
-  const result = await dynamodb.query(params).promise();
-  return result.Items && result.Items.length > 0;
+  const emailResult = await dynamodb.query(emailParams).promise();
+  if (emailResult.Items && emailResult.Items.length > 0) {
+    return true;
+  }
+  
+  // 检查用户名是否已存在（扫描表）
+  const scanParams = {
+    TableName: TABLE_NAME,
+    FilterExpression: 'username = :username',
+    ExpressionAttributeValues: {
+      ':username': username
+    }
+  };
+  
+  const scanResult = await dynamodb.scan(scanParams).promise();
+  return scanResult.Items && scanResult.Items.length > 0;
 }
 
 /**
@@ -62,8 +78,8 @@ async function registerUser(userData) {
   const { username, email, password } = userData;
   
   // 检查用户是否已存在
-  if (await checkUserExists(email)) {
-    throw new Error('邮箱已存在');
+  if (await checkUserExists(username, email)) {
+    throw new Error('用户名或邮箱已存在');
   }
   
   // 密码加密

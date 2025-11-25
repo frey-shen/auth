@@ -52,7 +52,7 @@ Content-Type: application/json
   "success": false,
   "message": "输入验证失败",
   "errors": [
-    "用户名必须至少3个字符",
+    "用户名必须至少2个字符",
     "邮箱格式不正确"
   ]
 }

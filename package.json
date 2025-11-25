@@ -1,0 +1,21 @@
+{
+  "name": "auth-lambda",
+  "version": "1.0.0",
+  "description": "AWS Lambda实战，实现用户注册",
+  "main": "index.js",
+  "scripts": {
+    "test": "node test-local.js"
+  },
+  "keywords": [
+    "aws",
+    "lambda",
+    "authentication",
+    "user-registration"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "uuid": "^9.0.0"
+  }
+}

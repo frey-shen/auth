@@ -1,0 +1,14 @@
+{
+  "name": "auth",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "test:register": "node tests/local-test.js register",
+    "test:login": "node tests/local-test.js login",
+    "test:getUser": "node tests/local-test.js getUser"
+  },
+  "dependencies": {
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {}
+}

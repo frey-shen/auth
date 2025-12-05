@@ -1,12 +1,16 @@
 import { v4 as uuidv4 } from 'uuid';
-import { CONFIG } from '../config.js';
+import { CONFIG } from '../config';
+import type { User, UserInDB, RegisterRequest, LoginResponse, TokenData } from '../types';
 
 /**
  * 用户服务类
  */
 class UserService {
+    // 模拟数据库（内存存储）
+    private mockDatabase: Map<string, UserInDB>;
+    private mockTokens: Map<string, TokenData>;
+
     constructor() {
-        // 模拟数据库（内存存储）
         this.mockDatabase = new Map();
         this.mockTokens = new Map();
     }
@@ -14,7 +18,7 @@ class UserService {
     /**
      * 简单的密码加密（实际项目用bcrypt）
      */
-    hashPassword(password) {
+    private hashPassword(password: string): string {
         // 这里只是演示，实际要用bcrypt或AWS Cognito
         return Buffer.from(password).toString('base64');
     }
@@ -22,14 +26,14 @@ class UserService {
     /**
      * 验证密码
      */
-    verifyPassword(password, hashedPassword) {
+    private verifyPassword(password: string, hashedPassword: string): boolean {
         return this.hashPassword(password) === hashedPassword;
     }
 
     /**
      * 生成Token（实际项目用JWT）
      */
-    generateToken(userId) {
+    private generateToken(userId: string): string {
         const token = uuidv4();
         this.mockTokens.set(token, {
             userId,
@@ -41,7 +45,7 @@ class UserService {
     /**
      * 验证Token
      */
-    verifyToken(token) {
+    private verifyToken(token: string): string | null {
         const tokenData = this.mockTokens.get(token);
         if (!tokenData) {
             return null;
@@ -56,9 +60,17 @@ class UserService {
     }
 
     /**
+     * 移除密码字段
+     */
+    private removePassword(user: UserInDB): User {
+        const { password, ...userWithoutPassword } = user;
+        return userWithoutPassword;
+    }
+
+    /**
      * 注册新用户
      */
-    async register(userData) {
+    async register(userData: RegisterRequest): Promise<User> {
         const { email, password, username } = userData;
 
         // 检查邮箱是否已存在
@@ -70,28 +82,30 @@ class UserService {
 
         // 创建新用户
         const userId = uuidv4();
-        const user = {
+        const now = new Date().toISOString();
+
+        const user: UserInDB = {
             id: userId,
             email,
             username,
             password: this.hashPassword(password),
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
+            createdAt: now,
+            updatedAt: now
         };
 
         this.mockDatabase.set(userId, user);
 
         // 返回用户信息（不包含密码）
-        const { password: _, ...userWithoutPassword } = user;
-        return userWithoutPassword;
+        return this.removePassword(user);
     }
 
     /**
      * 用户登录
      */
-    async login(email, password) {
+    async login(email: string, password: string): Promise<LoginResponse> {
         // 查找用户
-        let foundUser = null;
+        let foundUser: UserInDB | null = null;
+
         for (const user of this.mockDatabase.values()) {
             if (user.email === email) {
                 foundUser = user;
@@ -112,9 +126,8 @@ class UserService {
         const token = this.generateToken(foundUser.id);
 
         // 返回用户信息和Token
-        const { password: _, ...userWithoutPassword } = foundUser;
         return {
-            user: userWithoutPassword,
+            user: this.removePassword(foundUser),
             token,
             expiresIn: CONFIG.TOKEN_EXPIRY
         };
@@ -123,21 +136,22 @@ class UserService {
     /**
      * 获取用户信息
      */
-    async getUserById(userId) {
+    async getUserById(userId: string): Promise<User> {
         const user = this.mockDatabase.get(userId);
+
         if (!user) {
             throw new Error('User not found');
         }
 
-        const { password, ...userWithoutPassword } = user;
-        return userWithoutPassword;
+        return this.removePassword(user);
     }
 
     /**
      * 通过Token获取用户
      */
-    async getUserByToken(token) {
+    async getUserByToken(token: string): Promise<User> {
         const userId = this.verifyToken(token);
+
         if (!userId) {
             throw new Error('Invalid or expired token');
         }

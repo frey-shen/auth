@@ -3,12 +3,20 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "test:register": "node tests/local-test.js register",
-    "test:login": "node tests/local-test.js login",
-    "test:getUser": "node tests/local-test.js getUser"
+    "build": "tsc",
+    "test:register": "tsx tests/local-test.ts register",
+    "test:login": "tsx tests/local-test.ts login",
+    "test:getUser": "tsx tests/local-test.ts getUser",
+    "test": "tsx tests/local-test.ts"
   },
   "dependencies": {
     "uuid": "^9.0.0"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.145",
+    "@types/node": "^20.10.0",
+    "@types/uuid": "^9.0.7",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.3"
+  }
 }

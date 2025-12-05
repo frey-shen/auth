@@ -1,3 +1,5 @@
+import type { ValidationResult, RegisterRequest, LoginRequest } from '../types';
+
 /**
  * 参数验证工具
  */
@@ -5,7 +7,7 @@ export class Validator {
     /**
      * 验证邮箱格式
      */
-    static isValidEmail(email) {
+    static isValidEmail(email: string): boolean {
         const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         return regex.test(email);
     }
@@ -13,22 +15,22 @@ export class Validator {
     /**
      * 验证密码强度
      */
-    static isValidPassword(password, minLength = 6) {
-        return password && password.length >= minLength;
+    static isValidPassword(password: string, minLength: number = 6): boolean {
+        return Boolean(password) && password.length >= minLength;
     }
 
     /**
      * 验证用户名
      */
-    static isValidUsername(username) {
-        return username && username.length >= 3 && /^[a-zA-Z0-9_]+$/.test(username);
+    static isValidUsername(username: string): boolean {
+        return Boolean(username) && username.length >= 3 && /^[a-zA-Z0-9_]+$/.test(username);
     }
 
     /**
      * 验证注册数据
      */
-    static validateRegisterData(data) {
-        const errors = [];
+    static validateRegisterData(data: Partial<RegisterRequest>): ValidationResult {
+        const errors: string[] = [];
 
         if (!data.email) {
             errors.push('Email is required');
@@ -57,8 +59,8 @@ export class Validator {
     /**
      * 验证登录数据
      */
-    static validateLoginData(data) {
-        const errors = [];
+    static validateLoginData(data: Partial<LoginRequest>): ValidationResult {
+        const errors: string[] = [];
 
         if (!data.email) {
             errors.push('Email is required');

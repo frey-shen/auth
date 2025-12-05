@@ -1,7 +1,6 @@
-/**
- * 配置文件
- */
-export const CONFIG = {
+import type { AppConfig } from './types/lambda';
+
+export const CONFIG: AppConfig = {
   // 环境变量（在Lambda中从process.env读取）
   REGION: process.env.AWS_REGION || 'us-east-1',
   TABLE_NAME: process.env.USERS_TABLE || 'Users',
